@@ -1,0 +1,79 @@
+replicaCount: 1
+
+image:
+  repository: nethermind/nethermind
+  tag: latest
+  pullPolicy: Always
+  args: ["--config", "xdai", "--JsonRpc.Enabled", "true", "--JsonRpc.Host", "0.0.0.0", "--Metrics.Enabled", "true", "--Metrics.ExposePort", "9091", "--Network.MaxActivePeers", "50", "--Network.ActivePeersMaxCount", "50", "--Init.WebSocketsEnabled", "true", "--JsonRpc.WebSocketsPort", "8545", "--JsonRpc.EnabledModules", "[Admin, Eth, Subscribe, Trace, TxPool, Web3, Personal, Proof, Net, Parity, Health]", "--HealthChecks.Enabled", "true", "--JsonRpc.JwtSecretFile", "/nethermind/configs/custom.cfg", "--JsonRpc.EngineHost","0.0.0.0", "--JsonRpc.EnginePort", "8551", "--Merge.TerminalTotalDifficulty", "8626000000000000000000058750000000000000000000"]
+
+config: "1111111111611111161111113111111f11111e1111110111111a111111d11111"
+
+volumes:
+  data:
+    mountPath: /nethermind/nethermind_db
+  config:
+    mountPath: /nethermind/configs
+
+persistence:
+  enabled: true
+  storageClass: "local-storage"
+  accessModes:
+    - ReadWriteOnce
+  size: 500Gi
+
+serviceAccount:
+  create: true
+
+container:
+  ports:
+    http: 8545
+    gbc: 8551
+    prometheus: 9091
+    listener: 30303
+    discovery: 30303
+
+service:
+  type: ClusterIP
+  externalIPs: 
+  - 10.10.11.2
+  - 10.10.11.22
+  - 10.10.11.23
+  - 10.10.11.24
+  - 10.10.11.25
+  http: 8544
+  gbc: 8551
+  prometheus: 9091
+
+serviceP2P:
+  type: NodePort
+  listener: 30303
+  discovery: 30303
+
+prometheus: true
+
+resources:
+  requests:
+    memory: 32Gi
+    cpu: 4
+  limits:
+    memory: 32Gi
+    cpu: 6
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+livenessProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 120
+
+readinessProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
