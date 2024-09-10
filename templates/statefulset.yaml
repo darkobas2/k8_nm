@@ -38,6 +38,11 @@ spec:
             {{- toYaml .Values.image.command | nindent 12 }}
           args: 
             {{- toYaml .Values.image.args | nindent 12 }}
+          env:
+            - name: NETHERMIND_NETWORKCONFIG_P2PPORT
+              value: "{{ .Values.container.ports.listener }}"
+            - name: NETHERMIND_NETWORKCONFIG_DISCOVERYPORT
+              value: "{{ .Values.container.ports.discovery }}"
           ports:
             - name: http
               containerPort: {{ .Values.container.ports.http }}
